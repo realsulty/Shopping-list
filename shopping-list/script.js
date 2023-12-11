@@ -1,3 +1,45 @@
+const itemForm = document.getElementById('item-form');
+const itemInput = document.getElementById('item-input');
+const itemList = document.getElementById('item-list');
+
+function addItem(e){
+    e.preventDefault();
+
+    const newItem = itemInput.value;
+
+    // Validate input
+    if (newItem === '') {
+        alert('Please Insert an item');
+        return;
+    }
+    // create list item
+    const li = document.createElement('li');
+    li.appendChild(document.createTextNode(newItem)); 
+
+    const button = createButton('remove-item btn-link text-red'); // THE CLASS NAME SET TO BE AN ARGUMENT
+    li.appendChild(button);
+    
+    itemList.appendChild(li);
+    itemInput.value = '';  
+};
+
+function createButton(classes){ // CREATED THE FUNCTIONS WITH SET ARGMUNET FOT THE CLASS
+    const button = document.createElement('button');
+    button.className = classes;
+    const icon = createIcon('fa-solid fa-xmark'); //HERE THE CLASS IS ALREADY TO PASS AS AN ARGUMENT
+    button.appendChild(icon);
+    return button;
+
+}
+function createIcon(classes) { // EASIER WAY SINCE WE SAT THE CLASS AS AN ARGUMENT IN THE FUNC
+    const icon = document.createElement('i');
+    icon.className = classes;
+    return icon;
+
+};
+// event listeners
+itemForm.addEventListener('submit', addItem);
+
 // // Quick and messy way 
 // function createListItem(item) {
 //     const li = document.createElement('li');
@@ -128,9 +170,12 @@ clearBtn.addEventListener('click', ( )=> onClear());
 
 // Create a function track dragging
 // *** can be used in games and such
-// These called event hanlder functions -- evt -- e -- event -- different names 
-function onDrag(e){
-    document.querySelector('h1').textContent= `X ${e.pageX} Y ${e.pageY}`}; // This will make this h1
-    // used as a counter to track the movment of the notepad *** could be used on games ***
+// These called event object functions -- evt -- e -- event -- different names 
+// function onDrag(e){
+//     document.querySelector('h1').textContent= `X ${e.pageX} Y ${e.pageY}`}; // This will make this h1
+//     // used as a counter to track the movment of the notepad *** could be used on games ***
 
-document.querySelector('img').addEventListener('drag', onDrag);
+// document.querySelector('img').addEventListener('drag', onDrag);
+
+
+// now This is more efficent way of writing code 
