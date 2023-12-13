@@ -1,6 +1,8 @@
 const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
+const itemFilter = document.getElementById('filter');
+
 
 function addItem(e){
     e.preventDefault();
@@ -20,6 +22,7 @@ function addItem(e){
     li.appendChild(button);
     
     itemList.appendChild(li);
+    checkUI();
     itemInput.value = '';  
 };
 
@@ -39,6 +42,7 @@ function createIcon(classes) { // EASIER WAY SINCE WE SAT THE CLASS AS AN ARGUME
 };
 // event listeners
 itemForm.addEventListener('submit', addItem);
+
 
 // // Quick and messy way 
 // function createListItem(item) {
@@ -155,18 +159,43 @@ itemForm.addEventListener('submit', addItem);
 // removeItem4();
 
 
+function itemClear(e){
+        if (e.target.parentElement.classList.contains('remove-item')) {
+          
+          if(confirm('Are you sure?')) {
+              e.target.parentElement.parentElement.remove();
+              checkUI();
+          } 
+        } 
+}
+itemList.addEventListener('click', itemClear);
 
-function onClear(){
-    
-    const itemList = document.getElementById('item-list');
-    const items = itemList.querySelector('li');
+function onClear() {
     while (itemList.firstChild){
         itemList.removeChild(itemList.firstChild);
     }
+    checkUI();
 }
 
-const clearBtn = document.querySelector('#clear');
-clearBtn.addEventListener('click', ( )=> onClear());
+const clearBtn = document.getElementById('clear'); // ** Look up the other event listeners ^
+clearBtn.addEventListener('click', ( )=> onClear()); // The peranthese here fires the functions
+
+function checkUI() {
+    const items = itemList.querySelectorAll('li'); // The reason this is here and not in the globalscop
+    // beacuse you need to initiate this evrey time the function run
+    if (items.length === 0) {
+        clearBtn.style.display = 'none';
+        itemFilter.style.display = 'none';
+    } 
+    else {
+        clearBtn.style.display = 'block';
+        itemFilter.style.display = 'block';
+    }
+}
+
+checkUI();
+
+
 
 // Create a function track dragging
 // *** can be used in games and such
