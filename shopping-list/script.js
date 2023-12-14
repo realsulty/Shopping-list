@@ -2,9 +2,14 @@ const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const itemFilter = document.getElementById('filter');
+let isEditMode = false;
 
-
-function addItem(e){
+function displayItems() {
+    const itemsFromStorage = getItemsFromStorage();
+    itemsFromStorage.forEach((item) => addItemToDom(item));
+    checkUI();
+}
+function onAddItemSubmit(e){
     e.preventDefault();
 
     const newItem = itemInput.value;
@@ -14,17 +19,26 @@ function addItem(e){
         alert('Please Insert an item');
         return;
     }
-    // create list item
-    const li = document.createElement('li');
-    li.appendChild(document.createTextNode(newItem)); 
+    addItemToDom(newItem);
 
-    const button = createButton('remove-item btn-link text-red'); // THE CLASS NAME SET TO BE AN ARGUMENT
-    li.appendChild(button);
-    
-    itemList.appendChild(li);
+    // Add item to locsl sotrage
+    addItemToStorage(newItem)
     checkUI();
     itemInput.value = '';  
 };
+
+function addItemToDom(item){
+// create list item
+const li = document.createElement('li');
+li.appendChild(document.createTextNode(item)); 
+
+const button = createButton('remove-item btn-link text-red'); // THE CLASS NAME SET TO BE AN ARGUMENT
+li.appendChild(button);
+
+itemList.appendChild(li);
+}
+
+
 
 function createButton(classes){ // CREATED THE FUNCTIONS WITH SET ARGMUNET FOT THE CLASS
     const button = document.createElement('button');
@@ -40,9 +54,24 @@ function createIcon(classes) { // EASIER WAY SINCE WE SAT THE CLASS AS AN ARGUME
     return icon;
 
 };
-// event listeners
-itemForm.addEventListener('submit', addItem);
+function addItemToStorage(item) {
+    const itemsFromStorage = getItemsFromStorage()
+    itemsFromStorage.push(item);
+    // convert to JSON string and set to local storage
+    localStorage.setItem('items', JSON.stringify(itemsFromStorage))
+}
 
+function getItemsFromStorage() {
+    let itemsFromStorage;
+    if (localStorage.getItem('items') === null){
+        itemsFromStorage = [];
+    } else {
+        itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+    }
+
+    return itemsFromStorage;
+
+}
 
 // // Quick and messy way 
 // function createListItem(item) {
@@ -157,28 +186,75 @@ itemForm.addEventListener('submit', addItem);
 
 // // removeFirstItem();
 // removeItem4();
-
-
-function itemClear(e){
-        if (e.target.parentElement.classList.contains('remove-item')) {
-          
-          if(confirm('Are you sure?')) {
-              e.target.parentElement.parentElement.remove();
-              checkUI();
-          } 
-        } 
+function onClickItem(e) {
+    if (e.target.parentElement.classList.contains('remove-item')) {
+        itemClear(e.target.parentElement.parentElement);
+    } else {
+        setItemToEdit(e.target);
+    }
 }
-itemList.addEventListener('click', itemClear);
+
+function setItemToEdit(item){
+    isEditMode = true;
+    item.style.color = '#ccc'
+}
+function itemClear(item){
+          if (confirm('Are you sure?')) {
+            // Removing item from DOM
+             item.remove();
+
+             // Remove item from storage 
+             removeItemFromStorage(item.textContent);
+             checkUI();
+          } 
+        
+}
+
+
+function removeItemFromStorage(item){
+    let itemsFromStorage = getItemsFromStorage();
+
+    // Filter out items to be removed AND Filter will return a new array with the delete items 
+    itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
+
+    // Re-Set to local storage
+    localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+
+}
+
 
 function onClear() {
     while (itemList.firstChild){
         itemList.removeChild(itemList.firstChild);
     }
+
+    // clear from local storage 
+    localStorage.removeItem('items');
     checkUI();
 }
 
 const clearBtn = document.getElementById('clear'); // ** Look up the other event listeners ^
-clearBtn.addEventListener('click', ( )=> onClear()); // The peranthese here fires the functions
+
+
+
+function filterItems(e){
+    const items = itemList.querySelectorAll('li');
+    const text = e.target.value.toLowerCase();
+
+    items.forEach((item) => {
+        const itemName = item.firstChild.textContent.toLocaleLowerCase();
+        if (itemName.indexOf(text) != -1) {
+            item.style.display ='flex'
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+
+}
+
+
+
 
 function checkUI() {
     const items = itemList.querySelectorAll('li'); // The reason this is here and not in the globalscop
@@ -193,7 +269,20 @@ function checkUI() {
     }
 }
 
-checkUI();
+// Here you can create a function to wrap up all the other functions
+// just so you dont leave all of these functions in the global scoope 
+
+function init() {
+
+    // event listeners
+    itemForm.addEventListener('submit', onAddItemSubmit);
+    itemList.addEventListener('click', onClickItem);
+    clearBtn.addEventListener('click', ( )=> onClear()); // The peranthese here fires the functions
+    itemFilter.addEventListener('input', filterItems);
+    document.addEventListener('DOMContentLoaded', displayItems);
+    checkUI();
+}
+init();
 
 
 
@@ -201,8 +290,9 @@ checkUI();
 // *** can be used in games and such
 // These called event object functions -- evt -- e -- event -- different names 
 // function onDrag(e){
-//     document.querySelector('h1').textContent= `X ${e.pageX} Y ${e.pageY}`}; // This will make this h1
-//     // used as a counter to track the movment of the notepad *** could be used on games ***
+//     document.querySelector('h1').textContent= `X ${e.pageX} Y ${e.pageY}`};
+// This will make this h1
+// used as a counter to track the movment of the notepad *** could be used on games ***
 
 // document.querySelector('img').addEventListener('drag', onDrag);
 
