@@ -3,6 +3,7 @@ const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const itemFilter = document.getElementById('filter');
 let isEditMode = false;
+const formBtn = itemForm.querySelector('button');
 
 function displayItems() {
     const itemsFromStorage = getItemsFromStorage();
@@ -18,6 +19,19 @@ function onAddItemSubmit(e){
     if (newItem === '') {
         alert('Please Insert an item');
         return;
+    }
+    if (isEditMode) {
+        const itemToEdit = itemList.querySelector('.edit-mode');
+
+        removeItemFromStorage(itemToEdit.textContent);
+        // itemToEdit.style.color = 'black';
+        itemToEdit.remove();
+        isEditMode = false
+    } else {
+        if (checkIfItemExist(newItem)) {
+            alert('That item already exists!');
+            return;
+        }
     }
     addItemToDom(newItem);
 
@@ -196,7 +210,19 @@ function onClickItem(e) {
 
 function setItemToEdit(item){
     isEditMode = true;
-    item.style.color = '#ccc'
+    itemList
+    .querySelectorAll('li')
+    .forEach((i) => i.classList.remove('edit-mode'));
+
+    item.classList.add('edit-mode')
+    formBtn.innerHTML = '<i class="fa-solid fa-pen"> </i> Update Item';
+    formBtn.style.backgroundColor = '#228b22'
+    itemInput.value = item.textContent;
+}
+
+function checkIfItemExist(item){
+    const itemsFromStorage = getItemsFromStorage();
+    return itemsFromStorage.includes(item);
 }
 function itemClear(item){
           if (confirm('Are you sure?')) {
@@ -257,6 +283,8 @@ function filterItems(e){
 
 
 function checkUI() {
+itemInput.value = '';
+
     const items = itemList.querySelectorAll('li'); // The reason this is here and not in the globalscop
     // beacuse you need to initiate this evrey time the function run
     if (items.length === 0) {
@@ -267,6 +295,10 @@ function checkUI() {
         clearBtn.style.display = 'block';
         itemFilter.style.display = 'block';
     }
+
+    formBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Item';
+    formBtn.style.backgroundColor = '#333'
+
 }
 
 // Here you can create a function to wrap up all the other functions
